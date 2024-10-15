@@ -1,12 +1,12 @@
 <template>
-  <div class="resizable" :class="resizing ? '--v-resizing' : ''">
-    <div class="resizable__left"><slot name="left" /></div>
+  <div class="resizable-v" :class="resizing ? '--v-resizing' : ''">
+    <div class="resizable-v__left"><slot name="left" /></div>
 
-    <div class="resizable__bar" ref="resizableBar">
-      <div class="resizable__bar__inner" />
+    <div class="resizable-v__bar" ref="resizableBar">
+      <div class="resizable-v__bar__inner" />
     </div>
 
-    <div class="resizable__right"><slot name="right" /></div>
+    <div class="resizable-v__right"><slot name="right" /></div>
     <slot></slot>
   </div>
 </template>
@@ -25,6 +25,10 @@ export default {
     id: {
       type: String,
       default: "v-rz",
+    },
+    minWidthPercent: {
+      type: Number,
+      default: 38,
     },
   },
   data() {
@@ -59,8 +63,8 @@ export default {
   },
   methods: {
     limitElementWidth(element) {
-      element.style["max-width"] = "62%";
-      element.style["min-width"] = "38%";
+      element.style["max-width"] = `${100 - this.minWidthPercent}%`;
+      element.style["min-width"] = `${this.minWidthPercent}%`;
     },
     savePositionOnStartResizing(e) {
       this.leftSidePrevPosition = {
@@ -105,15 +109,18 @@ export default {
 
 <style lang="scss" scoped>
 $resizabla-bar-color: #6794fe;
-$resizable-bar-width: $base-space;
 
-.resizable {
+.resizable-v {
   $this: &;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   height: 100%;
   min-height: 0;
   width: 100%;
+  @include media("<desktop") {
+    flex-direction: column;
+  }
   &.--v-resizing {
     user-select: none;
   }
@@ -124,7 +131,6 @@ $resizable-bar-width: $base-space;
     align-items: center;
     height: 100%;
     width: 100%;
-    margin-right: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       min-width: 100% !important;
       height: auto !important;
@@ -137,7 +143,6 @@ $resizable-bar-width: $base-space;
     justify-content: center;
     align-items: center;
     height: 100%;
-    margin-left: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       align-items: flex-end;
       min-width: 100% !important;
@@ -147,8 +152,10 @@ $resizable-bar-width: $base-space;
   }
 
   &__bar {
+    position: relative;
     height: 100%;
-    width: $resizable-bar-width;
+    width: 1px;
+    background: var(--bg-opacity-10);
     display: flex;
     justify-content: center;
     z-index: 1;
@@ -158,8 +165,9 @@ $resizable-bar-width: $base-space;
     }
 
     &__inner {
+      position: absolute;
       height: 100%;
-      border-left: 1px solid var(--bg-opacity-10);
+      width: 4px;
       transition: all 0.1s ease-in;
     }
 
@@ -167,7 +175,7 @@ $resizable-bar-width: $base-space;
     .--v-resizing & {
       #{$this}__bar__inner {
         transition: all 0.1s ease-in;
-        border: 2px solid $resizabla-bar-color;
+        background: $resizabla-bar-color;
       }
     }
   }
